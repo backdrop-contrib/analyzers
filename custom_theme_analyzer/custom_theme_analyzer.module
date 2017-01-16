@@ -33,6 +33,7 @@ function custom_theme_analyzer_block_configure($delta = '', $settings = array())
 
     $settings += array(
       'blacklist' => config_get('custom_theme_analyzer.settings', 'blacklist'),
+      'display' => config_get('custom_theme_analyzer.settings', 'display'),
     );
 
     $form['blacklist'] = array(
@@ -40,6 +41,11 @@ function custom_theme_analyzer_block_configure($delta = '', $settings = array())
       '#title' => t('Blacklist'),
       '#description' => t('Enter one module per line of each modules that should not execute <em>hook_custom_theme()</em>. Example entry is <em>views</em> for the Views module.'),
       '#default_value' => $settings['blacklist'],
+    );
+    $form['display'] = array(
+      '#type' => 'checkbox',
+      '#title' => t("Display all invoked modules even if they doesn't change the theme."),
+      '#default_value' => $settings['display'],
     );
   }
 
@@ -74,6 +80,7 @@ function custom_theme_analyzer_block_view($delta = '', $settings = array(), $con
 
     $settings += array(
       'blacklist' => config_get('custom_theme_analyzer.settings', 'blacklist'),
+      'display' => config_get('custom_theme_analyzer.settings', 'display'),
     );
     $blacklist = preg_split("/\r\n|\n|\r|\s/", $settings['blacklist'], -1, PREG_SPLIT_NO_EMPTY);
 
@@ -86,13 +93,19 @@ function custom_theme_analyzer_block_view($delta = '', $settings = array(), $con
         $theme = module_invoke($module, 'custom_theme');
 
         if (is_null($theme)) {
-          $items[] = t('!module => %theme', array('!module' => $module, '%theme' => 'NULL'));
+          if ($settings['display']) {
+            $items[] = t('!module => %theme', array('!module' => $module, '%theme' => 'NULL'));
+          }
         }
         elseif (empty($theme)) {
-          $items[] = t("!module => ''", array('!module' => $module));
+          if ($settings['display']) {
+            $items[] = t("!module => ''", array('!module' => $module));
+          }
         }
         elseif (is_array($theme)) {
-          $items[] = t('!module => !theme', array('!module' => $module, '!theme' => serialize($theme)));
+          if ($settings['display']) {
+            $items[] = t('!module => !theme', array('!module' => $module, '!theme' => serialize($theme)));
+          }
         }
         else {
           $items[] = t('!module => !theme', array('!module' => $module, '!theme' => $theme));

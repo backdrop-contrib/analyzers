@@ -1,5 +1,6 @@
 
 {
   "_config_name": "custom_theme_analyzer.settings",
-  "blacklist": "views"
+  "blacklist": "views",
+  "display": "1"
 }
