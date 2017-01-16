@@ -1,0 +1,18 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the custom_theme_analyzer module.
+ */
+
+
+/**
+ * Implements hook_install().
+ */
+function custom_theme_analyzer_install() {
+
+  db_update('system')
+    ->fields(array('weight' => 1000))
+    ->condition('name', 'custom_theme_analyzer')
+    ->execute();
+}

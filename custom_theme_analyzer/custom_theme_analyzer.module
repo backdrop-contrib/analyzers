@@ -1,0 +1,123 @@
+<?php
+
+/**
+ * @file
+ * Displays a list of modules which override the system default theme sorted by
+ * module's call-up.
+ */
+
+
+/**
+ * Implements hook_block_info().
+ */
+function custom_theme_analyzer_block_info() {
+
+  $blocks['custom_theme_analyzer'] = array(
+    'info' => t('Custom Theme Analyzer'),
+    'description' => t('Displays a list of modules which override the system default theme.'),
+    'cache' => BACKDROP_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_configure().
+ */
+function custom_theme_analyzer_block_configure($delta = '', $settings = array()) {
+
+  $form = array();
+
+  if ($delta == 'custom_theme_analyzer') {
+
+    $settings += array(
+      'blacklist' => config_get('custom_theme_analyzer.settings', 'blacklist'),
+    );
+
+    $form['blacklist'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Blacklist'),
+      '#description' => t('Enter one module per line of each modules that should not execute <em>hook_custom_theme()</em>. Example entry is <em>views</em> for the Views module.'),
+      '#default_value' => $settings['blacklist'],
+    );
+  }
+
+  return $form;
+}
+
+
+/**
+ * Implements hook_block_save().
+ */
+function custom_theme_analyzer_block_save($delta = '', &$edit = array()) {
+
+  if ($delta == 'custom_theme_analyzer') {
+
+    config('custom_theme_analyzer.settings')
+      ->set('blacklist', $edit['blacklist'])
+      ->save();
+
+    unset($edit['blacklist']);
+  }
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function custom_theme_analyzer_block_view($delta = '', $settings = array(), $contexts = array()) {
+
+  $block = array();
+
+  if ($delta == 'custom_theme_analyzer') {
+
+    $settings += array(
+      'blacklist' => config_get('custom_theme_analyzer.settings', 'blacklist'),
+    );
+    $blacklist = preg_split("/\r\n|\n|\r|\s/", $settings['blacklist'], -1, PREG_SPLIT_NO_EMPTY);
+
+    $items = array();
+
+    foreach (module_implements('custom_theme') as $module) {
+
+      if (!in_array($module, $blacklist)) {
+
+        $theme = module_invoke($module, 'custom_theme');
+
+        if (is_null($theme)) {
+          $items[] = t('!module => %theme', array('!module' => $module, '%theme' => 'NULL'));
+        }
+        elseif (empty($theme)) {
+          $items[] = t("!module => ''", array('!module' => $module));
+        }
+        elseif (is_array($theme)) {
+          $items[] = t('!module => !theme', array('!module' => $module, '!theme' => serialize($theme)));
+        }
+        else {
+          $items[] = t('!module => !theme', array('!module' => $module, '!theme' => $theme));
+        }
+      }
+    }
+
+    $block['subject'] = t('Custom Theme Analyzer');
+    $block['content'] = t('List of modules which override the system default theme %theme:', array('%theme' => config_get('system.core', 'theme_default')));
+    $block['content'] .= theme('item_list', array('items' => $items, 'type' => 'ol'));
+  }
+
+  return $block;
+}
+
+
+/**
+ * Implements hook_config_info().
+ */
+function custom_theme_analyzer_config_info() {
+
+  $prefixes['custom_theme_analyzer.settings'] = array(
+    'label' => t('Custom Theme Analyzer settings'),
+    'group' => t('Configuration'),
+  );
+
+  return $prefixes;
+}
