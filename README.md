@@ -2,8 +2,9 @@
 Analyzers
 =========
 
-A collection of small modules to analyze the website and includes following
-features:
+A collection of small modules to analyze the website.
+
+For the moment, it includes the following tools:
 
 - **Custom Theme Analyzer**  
   Displays a list of modules which override the system default theme sorted by

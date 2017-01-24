@@ -61,10 +61,14 @@ function custom_theme_analyzer_block_save($delta = '', &$edit = array()) {
   if ($delta == 'custom_theme_analyzer') {
 
     config('custom_theme_analyzer.settings')
-      ->set('blacklist', $edit['blacklist'])
+      ->setData(array(
+        'blacklist' => $edit['blacklist'],
+        'display' => $edit['display'],
+      ))
       ->save();
 
     unset($edit['blacklist']);
+    unset($edit['display']);
   }
 }
 
