@@ -10,12 +10,6 @@ For the moment, it includes the following tools:
   Displays a list of modules which override the system default theme sorted by
   module's call-up.
 
-Installation
-------------
-
-- Install this module using the official Backdrop CMS instructions at
-  https://backdropcms.org/guide/modules
-
 License
 -------
 
